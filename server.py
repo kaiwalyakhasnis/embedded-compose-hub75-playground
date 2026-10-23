@@ -196,7 +196,7 @@ def main():
         subprocess.run([str(ROOT / "led/build.sh")], check=True)
     if not (WEB / "playground").is_dir():
         print("first build of the playground (a few minutes the very first time)...", flush=True)
-        first = next(e for e in examples() if e["id"] == "hello")
+        first = next(e for e in examples() if e["id"] == "ledtest")
         print(compile_files(first["files"]).get("log") or "ok", flush=True)
     server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
     print(f"embedded-compose-led-matrix-playground: http://127.0.0.1:{args.port}/  (sources from {EC})", flush=True)
