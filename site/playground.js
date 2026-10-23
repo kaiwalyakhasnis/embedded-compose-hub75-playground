@@ -385,7 +385,7 @@ addEventListener("keydown", (e) => {
     }
   }
   for (const e of examples) $("example").append(new Option(e.title, e.id));
-  openExample(store.get("example", "matrix"));
+  openExample(store.get("example", "ledtest"));
   // Show the last build at once if it is of these files; otherwise build them.
   const last = await compiler.lastBuild(files);
   if (last) {

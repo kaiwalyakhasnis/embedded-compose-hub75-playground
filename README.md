@@ -53,10 +53,11 @@ The page needs a browser with WebAssembly GC: Chrome or Edge 119+, Firefox
 
 ## Using it
 
-- **Examples:** *Matrix* is embedded-compose's `apps/matrix`, its sources
-  unchanged: a clock, a plasma, Life and a marquee. *LED test* checks a
-  panel step by step (every LED, module numbers, an arrow, sweeps, text),
-  made for MAX7219 modules. *Bounce* and *Fire* are short starters. Your edits are kept in the browser for each
+- **Examples:** *LED test*, the first one opened, checks a panel step by
+  step (every LED, module numbers, an arrow, sweeps, text), made for
+  MAX7219 modules. *Matrix* is embedded-compose's `apps/matrix`, its sources
+  unchanged: a clock, a plasma, Life and a marquee. *Bounce* and *Fire* are
+  short starters. Your edits are kept in the browser for each
   example, and **Reset** undoes them.
 - **Code:** one file must define `@Composable fun App()`. Use **+** to add
   more files. The API is embedded-compose's toolkit (`ui.*`): `Box`, `Row`,
