@@ -50,6 +50,7 @@ def main():
     (out / "toolkit.json").write_text(json.dumps(toolkit_sources()))
 
     # Each example, optimised. The playground's sources are put back after.
+    server.SRC.mkdir(parents=True, exist_ok=True)
     saved = {p.name: p.read_text() for p in server.SRC.glob("*.kt")}
     try:
         for e in examples:
