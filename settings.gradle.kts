@@ -10,6 +10,6 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "embedded-compose-hub75-playground"
+rootProject.name = "embedded-compose-led-matrix-playground"
 include(":toolkit")      // embedded-compose's core/ui, compiled for the browser
 include(":playground")   // the code from the editor (out/playground/src)

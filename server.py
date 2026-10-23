@@ -69,7 +69,7 @@ def examples():
     matrix = EC / "apps/matrix/src/linuxArm64Main/kotlin/matrix"
     if matrix.is_dir():
         files = {"App.kt": (
-            "// The matrix app of embedded-compose (apps/matrix), as on a Raspberry Pi with a HUB75 panel.\n"
+            "// The matrix app of embedded-compose (apps/matrix), as on a Raspberry Pi with an LED panel.\n"
             "// Left/Right: page; Enter: the page's style. MatrixApp.kt and Pages.kt are that app's sources.\n"
             "import androidx.compose.runtime.Composable\n\n"
             "@Composable\nfun App() = matrix.MatrixApp()\n")}
@@ -199,7 +199,7 @@ def main():
         first = next(e for e in examples() if e["id"] == "hello")
         print(compile_files(first["files"]).get("log") or "ok", flush=True)
     server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
-    print(f"embedded-compose-hub75-playground: http://127.0.0.1:{args.port}/  (sources from {EC})", flush=True)
+    print(f"embedded-compose-led-matrix-playground: http://127.0.0.1:{args.port}/  (sources from {EC})", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

@@ -161,16 +161,37 @@ function overlay(text, kind = "") {
 
 // --------------------------------------------------------------- simulator
 
+// The panels, as embedded-compose drives them: HUB75 (RGB, rpi-hub75) and
+// MAX7219 modules (red LEDs, on or off; rpi-max7219). Sizes in LEDs.
+const PANELS = {
+  hub75: {
+    size: "64x32",
+    sizes: [["32x16", "32 × 16"], ["64x32", "64 × 32"], ["64x64", "64 × 64"], ["128x32", "128 × 32 (two chained)"], ["128x64", "128 × 64"]],
+  },
+  max7219: {
+    size: "32x8",
+    sizes: [["32x8", "32 × 8 (4-in-1)"], ["64x8", "64 × 8 (two 4-in-1)"]],
+  },
+};
+
 function panelSize() {
   const [w, h] = $("size").value.split("x").map(Number);
-  return { w, h };
+  return { w, h, mono: $("panel").value === "max7219" };
+}
+
+// The size list for the chosen panel, with the size last used on it.
+function fillSizes() {
+  const panel = PANELS[$("panel").value];
+  $("size").replaceChildren(...panel.sizes.map(([value, text]) => new Option(text, value)));
+  const saved = store.get(`size:${$("panel").value}`, panel.size);
+  $("size").value = panel.sizes.some(([value]) => value === saved) ? saved : panel.size;
 }
 
 function startSim() {
-  const { w, h } = panelSize();
+  const { w, h, mono } = panelSize();
   $("bezel").style.aspectRatio = `${w} / ${h}`;
   overlay(src.startsWith("blob:") ? "starting… (the first time, the Kotlin runtime downloads from JetBrains)" : null);
-  $("sim").src = `sim.html?w=${w}&h=${h}&src=${encodeURIComponent(src)}`;
+  $("sim").src = `sim.html?w=${w}&h=${h}${mono ? "&mono=1" : ""}&src=${encodeURIComponent(src)}`;
 }
 
 addEventListener("message", (e) => {
@@ -187,8 +208,11 @@ addEventListener("message", (e) => {
 });
 const toSim = (msg) => $("sim").contentWindow?.postMessage({ source: "ec-page", ...msg }, location.origin);
 
-$("size").value = store.get("size", "64x32");
-$("size").onchange = () => { store.set("size", $("size").value); if (src) startSim(); };
+const savedPanel = store.get("panel", "hub75");
+$("panel").value = savedPanel in PANELS ? savedPanel : "hub75";
+fillSizes();
+$("panel").onchange = () => { store.set("panel", $("panel").value); fillSizes(); if (src) startSim(); };
+$("size").onchange = () => { store.set(`size:${$("panel").value}`, $("size").value); if (src) startSim(); };
 $("restart").onclick = () => src && startSim();
 $("snapshot").onclick = () => toSim({ type: "snapshot" });
 for (const b of document.querySelectorAll("#keys button")) {

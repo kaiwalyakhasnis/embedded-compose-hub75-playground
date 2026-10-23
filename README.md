@@ -1,15 +1,16 @@
-# embedded-compose-hub75-playground: Compose for HUB75 LED panels, in the browser
+# embedded-compose-led-matrix-playground: Compose for LED matrices, in the browser
 
 Write Compose code for an LED matrix in the browser, press **Run**, and
-watch it on a simulated HUB75 panel. The code is compiled with
+watch it on a simulated panel: an RGB HUB75 panel, or a strip of
+single-colour MAX7219 modules. The code is compiled with
 [embedded-compose](https://github.com/kaiwalyakhasnis/embedded-compose)'s own toolkit, and drawn by that
 project's own LED-matrix backend, so what you see is what the Raspberry Pi
 sends to the panel.
 
-**Try it: https://kaiwalyakhasnis.github.io/embedded-compose-hub75-playground/** (nothing to
+**Try it: https://kaiwalyakhasnis.github.io/embedded-compose-led-matrix-playground/** (nothing to
 install; a recent Chrome, Edge, Firefox or Safari)
 
-[![The matrix app's plasma page in the playground](docs/playground.png)](https://kaiwalyakhasnis.github.io/embedded-compose-hub75-playground/)
+[![The matrix app's plasma page in the playground](docs/playground.png)](https://kaiwalyakhasnis.github.io/embedded-compose-led-matrix-playground/)
 
 ## Run it
 
@@ -67,8 +68,12 @@ The page needs a browser with WebAssembly GC: Chrome or Edge 119+, Firefox
   buttons on the Pi. The buttons under the panel send Left, Up, Down, Right
   and Enter. Mouse clicks are touches (`Modifier.pointerInput`,
   `clickable`).
-- **Panel:** 32×16 to 128×64. Changing the size restarts the app without
-  recompiling. **Snapshot** saves a PNG.
+- **Panel:** *HUB75* (RGB, 32×16 to 128×64) or *MAX7219* (one colour,
+  32×8 for a 4-in-1 board, 64×8 for two). A MAX7219 LED is either on or
+  off: it is lit where the app's colour is bright (its brightest channel at
+  least 128), as embedded-compose's max7219 backend does. Changing the
+  panel or size restarts the app without recompiling. **Snapshot** saves a
+  PNG.
 - **Ctrl+Enter** (or Ctrl+S) runs. Compiler errors are marked in the editor
   and listed in the console; click an entry to jump to it. `log("...")`
   prints to the console.
@@ -96,7 +101,8 @@ The page needs a browser with WebAssembly GC: Chrome or Edge 119+, Firefox
   Only `runApp()` is cut out at build time.
 - **The pixels:** `backends/matrix/matrix.cpp`, which handles fills, alpha
   blending and the 5x7 font, compiled from that checkout to WebAssembly.
-  Its frames go to the page instead of to rpi-rgb-led-matrix.
+  Its frames go to the page instead of to rpi-rgb-led-matrix or the
+  MAX7219s' SPI.
 - **The app code:** `apps/matrix` compiles unchanged. Its `platform.posix`
   wall-clock calls (`time`, `localtime_r`, `clock_gettime`) are served by a
   small shim that uses the browser's clock (`toolkit/src/wasmJsMain/kotlin/posix`).
@@ -105,9 +111,10 @@ The page needs a browser with WebAssembly GC: Chrome or Edge 119+, Firefox
 - **`runApp()`:** on the device it blocks waiting for input. A page can't
   block, so `ui/WebRuntime.kt` runs the same loop body one step at a time,
   with each next step scheduled by the page.
-- **The panel's look:** the simulator shows the RGB frame. A real panel
-  adds PWM and colour depth, luminance correction, the refresh rate and
-  brightness, so colours and dim levels differ a little.
+- **The panel's look:** the simulator shows the RGB frame (MAX7219: lit
+  where it is bright). A real HUB75 panel adds PWM and colour depth,
+  luminance correction, the refresh rate and brightness, so colours and dim
+  levels differ a little. A MAX7219's brightness is its `intensity` setting.
 - **Images:** the simulator has none yet (`ImageBitmap.load` returns null).
 - **Native code:** only the wall-clock part of `platform.posix` exists, and
   other `kotlinx.cinterop` code (sysfs, files) won't compile.
@@ -117,8 +124,8 @@ The page needs a browser with WebAssembly GC: Chrome or Edge 119+, Firefox
 The playground's files make an embedded-compose app. Put them in an app
 directory with a `build.gradle.kts` and a `Main.kt` like
 `embedded-compose/apps/matrix`'s. Then build it with
-`APP_DIR=<dir> ./ec build rpi-hub75` there and copy it to the Pi with
-`./ec run rpi-hub75`.
+`APP_DIR=<dir> ./ec build rpi-hub75` there (or `rpi-max7219`) and copy it
+to the Pi with `./ec run rpi-hub75` (or `rpi-max7219`).
 
 ## Layout
 

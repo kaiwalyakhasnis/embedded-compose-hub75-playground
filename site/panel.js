@@ -1,10 +1,13 @@
 // An LED panel on a canvas: each pixel of the frame is one LED, drawn as a
 // dot on a black board with a little glow. Off LEDs stay faintly visible,
-// as on a real panel.
+// as on a real panel. A mono panel shows MAX7219 modules as embedded-compose's
+// max7219 backend drives them: an LED is red where the frame's brightest
+// channel is at least 128, else off.
 
 export class Panel {
-  constructor(canvas, width, height) {
+  constructor(canvas, width, height, mono = false) {
     this.canvas = canvas;
+    this.mono = mono;
     this.ctx = canvas.getContext("2d");
     this.w = width;
     this.h = height;
@@ -26,6 +29,13 @@ export class Panel {
   frame(rgb) {
     const d = this.image.data;
     for (let i = 0, j = 0; i < rgb.length; i += 3, j += 4) {
+      if (this.mono) {
+        const on = Math.max(rgb[i], rgb[i + 1], rgb[i + 2]) >= 128;
+        d[j] = on ? 255 : 0;
+        d[j + 1] = on ? 40 : 0;
+        d[j + 2] = on ? 24 : 0;
+        continue;
+      }
       d[j] = rgb[i];
       d[j + 1] = rgb[i + 1];
       d[j + 2] = rgb[i + 2];

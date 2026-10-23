@@ -23,10 +23,11 @@ import { Panel } from "./panel.js";
 const params = new URLSearchParams(location.search);
 const src = params.get("src") || "build/playground/playground.mjs";
 const width = +params.get("w") || 64, height = +params.get("h") || 32;
+const mono = params.get("mono") === "1";
 const post = (msg) => parent !== window && parent.postMessage({ source: "ec-sim", ...msg }, location.origin);
 
 const canvas = document.getElementById("panel");
-const panel = new Panel(canvas, width, height);
+const panel = new Panel(canvas, width, height, mono);
 
 let fpsFrames = 0;
 setInterval(() => { post({ type: "fps", fps: panel.frames - fpsFrames, frames: panel.frames }); fpsFrames = panel.frames; }, 1000);
