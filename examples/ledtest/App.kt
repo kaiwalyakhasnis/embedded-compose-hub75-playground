@@ -7,7 +7,7 @@
 //                                   each module's top-left corner
 //   3 a frame and an arrow          the arrow should point right
 //   4 a column, then a row, sweeping left to right, top to bottom
-//   5 scrolling text
+//   5 scrolling text           the whole message, once across
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -33,12 +33,17 @@ private enum class Step(val title: String, val millis: Long) {
     Numbers("module numbers, left to right, dot top-left", 6000),
     Arrow("a frame and an arrow pointing right", 4000),
     Sweep("a column left to right, then a row top to bottom", 4500),
-    Text("scrolling text", 9000),
+    Text("scrolling text", 0),  // as long as the message takes to pass: textMillis()
 }
 
 private const val KEY_ENTER = 28
 private const val KEY_RIGHT = 106
-private const val MESSAGE = "HELLO FROM EMBEDDED-COMPOSE ON A MAX7219    "
+private const val MESSAGE = "HELLO FROM EMBEDDED-COMPOSE ON A MAX7219"
+private const val CELL = 6    // a character and its gap, in LEDs
+private const val SPEED = 20  // LEDs a second
+
+// The text comes in at the right edge and leaves at the left one.
+private fun textMillis(width: Int) = (width + MESSAGE.length * CELL) * 1000L / SPEED
 
 @Composable
 fun App() = TestApp()
@@ -55,7 +60,7 @@ private fun TestApp() {
     }
     LaunchedEffect(index) {
         log("test ${index + 1}/${Step.entries.size}: ${step.title} (${Device.width}x${Device.height})")
-        delay(step.millis)
+        delay(if (step == Step.Text) textMillis(Device.width) else step.millis)
         index = (index + 1) % Step.entries.size
     }
     key(index) { StepView(step) }
@@ -87,12 +92,7 @@ private fun StepView(step: Step) {
                 if (column < w) rect(column, 0, 1, h)
                 else rect(0, minOf(((millis - w * 60) / 150).toInt(), h - 1), w, 1)
             }
-            Step.Text -> {
-                val cell = 6
-                val total = MESSAGE.length * cell
-                val start = -((millis * 20 / 1000).toInt() % total)
-                for (copy in 0..1) drawText(MESSAGE, Offset((start + copy * total).toFloat(), (h - 7) / 2f), Color.White)
-            }
+            Step.Text -> drawText(MESSAGE, Offset(w - millis * SPEED / 1000f, (h - 7) / 2f), Color.White)
         }
     }
 }
