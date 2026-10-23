@@ -2,11 +2,14 @@
 
 Write Compose code for an LED matrix in the browser, press **Run**, and
 watch it on a simulated HUB75 panel. The code is compiled with
-[embedded-compose](../embedded-compose)'s own toolkit, and drawn by that
+[embedded-compose](https://github.com/kaiwalyakhasnis/embedded-compose)'s own toolkit, and drawn by that
 project's own LED-matrix backend, so what you see is what the Raspberry Pi
 sends to the panel.
 
-![The matrix app's plasma page in the playground](docs/playground.png)
+**Try it: https://kaiwalyakhasnis.github.io/embedded-compose-sim/** (nothing to
+install; a recent Chrome, Edge, Firefox or Safari)
+
+[![The matrix app's plasma page in the playground](docs/playground.png)](https://kaiwalyakhasnis.github.io/embedded-compose-sim/)
 
 ## Run it
 
