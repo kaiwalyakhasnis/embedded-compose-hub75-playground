@@ -1,0 +1,7 @@
+# Build output and downloads (wasi-sdk), and the playground's current code
+/out/
+# Gradle/Kotlin caches
+/.gradle/
+/.kotlin/
+/kotlin-js-store/
+__pycache__/

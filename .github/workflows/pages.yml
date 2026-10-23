@@ -1,0 +1,46 @@
+# Builds the static playground (pages.py) and publishes it with GitHub Pages
+# (Settings > Pages > Source: GitHub Actions). Run by hand for now; add
+#   push:
+#     branches: [main]
+# to publish on every push.
+name: Pages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: kaiwalyakhasnis/embedded-compose
+          path: embedded-compose
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: EC_DIR=embedded-compose ./pages.py out/pages
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out/pages
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

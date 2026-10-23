@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Ccircle cx=%228%22 cy=%228%22 r=%226%22 fill=%22%2339d98a%22/%3E%3C/svg%3E">
+<title>LED panel</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #050506; overflow: hidden; }
+  #box { position: absolute; inset: 0; }
+  canvas { display: block; touch-action: none; outline: none; cursor: crosshair; }
+</style>
+</head>
+<body>
+<div id="box"><canvas id="panel" tabindex="0"></canvas></div>
+<script type="module">
+// One run of an app: the panel, ecHal, and the app's Kotlin/Wasm module
+// (src: a build's .mjs, or a blob of one). The playground page reloads this
+// frame to restart.
+import { createHal, linuxKey } from "./hal.js";
+import { Panel } from "./panel.js";
+
+const params = new URLSearchParams(location.search);
+const src = params.get("src") || "build/playground/playground.mjs";
+const width = +params.get("w") || 64, height = +params.get("h") || 32;
+const post = (msg) => parent !== window && parent.postMessage({ source: "ec-sim", ...msg }, location.origin);
+
+const canvas = document.getElementById("panel");
+const panel = new Panel(canvas, width, height);
+
+let fpsFrames = 0;
+setInterval(() => { post({ type: "fps", fps: panel.frames - fpsFrames, frames: panel.frames }); fpsFrames = panel.frames; }, 1000);
+
+try {
+  globalThis.ecHal = await createHal({
+    width, height,
+    show: (rgb) => { panel.frame(rgb); if (panel.frames === 1) post({ type: "frame" }); },
+    log: (text) => { console.log(text); post({ type: "log", text }); },
+    crash: (text) => post({ type: "crash", text }),
+    powerOff: () => post({ type: "log", text: "power off" }),
+  });
+} catch (e) {
+  post({ type: "crash", text: `led.wasm: ${e}` });
+  throw e;
+}
+
+// Keys: when this frame has focus, or sent by the page's buttons.
+const held = new Set();
+addEventListener("keydown", (e) => {
+  const code = linuxKey(e.code);
+  if (code === undefined || e.ctrlKey || e.metaKey) return;
+  e.preventDefault();
+  ecHal.key(code, held.has(code) ? 2 : 1);
+  held.add(code);
+});
+addEventListener("keyup", (e) => {
+  const code = linuxKey(e.code);
+  if (code === undefined || !held.delete(code)) return;
+  e.preventDefault();
+  ecHal.key(code, 0);
+});
+addEventListener("blur", () => { for (const code of held) ecHal.key(code, 0); held.clear(); });
+addEventListener("message", (e) => {
+  if (e.origin !== location.origin || e.data?.source !== "ec-page") return;
+  if (e.data.type === "key") ecHal.key(e.data.code, e.data.value);
+  if (e.data.type === "snapshot") post({ type: "snapshot", url: panel.snapshot() });
+});
+
+// Pointer: the LED under it, in panel pixels.
+let down = false;
+const pointer = (kind, e) => {
+  const r = canvas.getBoundingClientRect();
+  const { x, y } = panel.ledAt(e.clientX - r.left, e.clientY - r.top);
+  ecHal.pointer(kind, x, y);
+};
+canvas.addEventListener("pointerdown", (e) => { canvas.focus(); canvas.setPointerCapture(e.pointerId); down = true; pointer("down", e); });
+canvas.addEventListener("pointermove", (e) => { if (down) pointer("move", e); });
+canvas.addEventListener("pointerup", (e) => { if (down) { down = false; pointer("up", e); } });
+canvas.addEventListener("pointercancel", (e) => { if (down) { down = false; pointer("up", e); } });
+
+post({ type: "started", width, height });
+try {
+  await import(new URL(src, location.href).href);
+} catch (e) {
+  post({ type: "crash", text: `${src}: ${e}` });
+  throw e;
+}
+</script>
+</body>
+</html>
