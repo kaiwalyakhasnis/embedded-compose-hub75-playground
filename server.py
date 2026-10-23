@@ -199,7 +199,7 @@ def main():
         first = next(e for e in examples() if e["id"] == "hello")
         print(compile_files(first["files"]).get("log") or "ok", flush=True)
     server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
-    print(f"embedded-compose-sim: http://127.0.0.1:{args.port}/  (sources from {EC})", flush=True)
+    print(f"embedded-compose-hub75-playground: http://127.0.0.1:{args.port}/  (sources from {EC})", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
