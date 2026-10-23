@@ -229,6 +229,19 @@ const local = {
 };
 
 const KCS = "https://api.kotlinlang.org";
+
+// fetch, saying which request failed and how; a network failure is tried once more.
+async function request(what, url, options) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await fetch(url, options);
+    } catch (e) {
+      if (attempt === 2) throw new Error(`${what} failed: ${e.message} (${url})`);
+      say(`${what}: ${e.message}; trying again`, "warning");
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+  }
+}
 const kotlinPlayground = {
   name: "api.kotlinlang.org",
   toolkit: null,  // toolkit.json: the toolkit's sources, sent with every compile
@@ -240,10 +253,11 @@ const kotlinPlayground = {
     const prebuilt = await this.lastBuild(fs);
     if (prebuilt) return { ok: true, src: prebuilt, diagnostics: [], seconds: 0 };
     const t0 = performance.now();
-    this.toolkit ??= await (await fetch("toolkit.json")).json();
-    this.version ??= (await (await fetch(`${KCS}/versions`)).json()).find((v) => v.hasComposeAssets).version;
+    this.toolkit ??= await (await request("loading toolkit.json", "toolkit.json")).json();
+    this.version ??= (await (await request("asking which Kotlin versions it has", `${KCS}/versions`)).json())
+      .find((v) => v.hasComposeAssets)?.version ?? "2.4.0";
     const all = { ...this.toolkit, ...fs };
-    const res = await fetch(`${KCS}/api/${this.version}/compiler/translate?compiler=compose-wasm`, {
+    const res = await request("compiling", `${KCS}/api/${this.version}/compiler/translate?compiler=compose-wasm`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ args: "", confType: "compose-wasm", files: Object.entries(all).map(([name, text]) => ({ name, text, publicId: "" })) }),
     });
@@ -309,8 +323,13 @@ async function run() {
       if (!src) overlay("fix the errors and Run");
     }
   } catch (e) {
-    status(`can't reach ${compiler.name}`, "error");
-    say(`compile: ${e}${compiler === local ? ". Is ./server.py running?" : ""}`, "error");
+    const network = e instanceof TypeError || /Failed to fetch|NetworkError|Load failed/.test(e.message);
+    status(network ? `can't reach ${compiler.name}` : "compile failed: see the console", "error");
+    say(`${e.message || e}${compiler === local ? ". Is ./server.py running?" : ""}`, "error");
+    if (network && compiler !== local) {
+      say("Your browser couldn't connect to api.kotlinlang.org. Open https://api.kotlinlang.org/versions in a new tab: " +
+          "if that fails too, a network filter, VPN or ad/privacy blocker is stopping it.", "error");
+    }
   } finally {
     compiling = false;
     if (again) { again = false; run(); }
