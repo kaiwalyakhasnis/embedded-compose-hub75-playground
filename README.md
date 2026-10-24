@@ -1,8 +1,8 @@
 # embedded-compose-led-matrix-playground: Compose for LED matrices, in the browser
 
 Write Compose code for an LED matrix in the browser, press **Run**, and
-watch it on a simulated panel: an RGB HUB75 panel, or a strip of
-single-colour MAX7219 modules. The code is compiled with
+watch it on a simulated panel: a strip of single-colour MAX7219 modules
+(the default), or an RGB HUB75 panel. The code is compiled with
 [embedded-compose](https://github.com/kaiwalyakhasnis/embedded-compose)'s own toolkit, and drawn by that
 project's own LED-matrix backend, so what you see is what the Raspberry Pi
 sends to the panel.
@@ -70,8 +70,8 @@ The page needs a browser with WebAssembly GC: Chrome or Edge 119+, Firefox
   buttons on the Pi. The buttons under the panel send Left, Up, Down, Right
   and Enter. Mouse clicks are touches (`Modifier.pointerInput`,
   `clickable`).
-- **Panel:** *HUB75* (RGB, 32×16 to 128×64) or *MAX7219* (one colour,
-  32×8 for a 4-in-1 board, 64×8 for two). A MAX7219 LED is either on or
+- **Panel:** *MAX7219* (one colour, 32×8 for a 4-in-1 board, the
+  default, or 64×8 for two) or *HUB75* (RGB, 32×16 to 128×64). A MAX7219 LED is either on or
   off: it is lit where the app's colour is bright (its brightest channel at
   least 128), as embedded-compose's max7219 backend does. Changing the
   panel or size restarts the app without recompiling. **Snapshot** saves a

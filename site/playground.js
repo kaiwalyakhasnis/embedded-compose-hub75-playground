@@ -161,8 +161,8 @@ function overlay(text, kind = "") {
 
 // --------------------------------------------------------------- simulator
 
-// The panels, as embedded-compose drives them: HUB75 (RGB, rpi-hub75) and
-// MAX7219 modules (red LEDs, on or off; rpi-max7219). Sizes in LEDs.
+// The panels, as embedded-compose drives them: MAX7219 modules (red LEDs, on
+// or off; rpi-max7219), the default, and HUB75 (RGB, rpi-hub75). Sizes in LEDs.
 const PANELS = {
   hub75: {
     size: "64x32",
@@ -208,8 +208,8 @@ addEventListener("message", (e) => {
 });
 const toSim = (msg) => $("sim").contentWindow?.postMessage({ source: "ec-page", ...msg }, location.origin);
 
-const savedPanel = store.get("panel", "hub75");
-$("panel").value = savedPanel in PANELS ? savedPanel : "hub75";
+const savedPanel = store.get("panel", "max7219");
+$("panel").value = savedPanel in PANELS ? savedPanel : "max7219";
 fillSizes();
 $("panel").onchange = () => { store.set("panel", $("panel").value); fillSizes(); if (src) startSim(); };
 $("size").onchange = () => { store.set(`size:${$("panel").value}`, $("size").value); if (src) startSim(); };
