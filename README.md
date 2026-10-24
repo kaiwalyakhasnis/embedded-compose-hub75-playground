@@ -102,7 +102,7 @@ The page needs a browser with WebAssembly GC: Chrome or Edge 119+, Firefox
 ```
 
 **The same as on the Pi:**
-- **The toolkit:** core/ui (with `ui.led`), compiled from the embedded-compose checkout,
+- **The toolkit:** core/ui and core/led (`ui.led`), compiled from the embedded-compose checkout,
   including `Runtime.kt` (its event loop, input dispatch and `Device`).
   Only `runApp()` is cut out at build time.
 - **The pixels:** `backends/matrix/matrix.cpp`, which handles fills, alpha

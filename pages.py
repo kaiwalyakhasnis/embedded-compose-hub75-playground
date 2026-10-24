@@ -27,7 +27,8 @@ def toolkit_sources():
     """{name: text} of everything the playground compiles besides the user's files.
     Names start with "ec-", which the editor doesn't allow, so they can't clash."""
     gradle(":toolkit:runtimeWithoutRunApp")
-    paths = sorted(p for p in (server.EC / "core/ui/src/linuxArm64Main/kotlin/ui").rglob("*.kt") if p.name != "Runtime.kt")
+    paths = sorted(p for p in (server.EC / "core/ui/src/linuxArm64Main/kotlin/ui").glob("*.kt") if p.name != "Runtime.kt")
+    paths += sorted((server.EC / "core/led/src/linuxArm64Main/kotlin").rglob("*.kt"))
     paths.append(server.OUT / "gradle/toolkit/generated/ec/ui/EcRuntime.kt")
     paths += sorted((ROOT / "toolkit/src/wasmJsMain/kotlin").rglob("*.kt"))
     paths += sorted((ROOT / "playground/src/wasmJsMain/kotlin").glob("*.kt"))

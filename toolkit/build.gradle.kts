@@ -1,4 +1,4 @@
-// embedded-compose's toolkit (core/ui) for the browser, compiled from that
+// embedded-compose's toolkit (core/ui, with core/led's ui.led) for the browser, compiled from that
 // checkout as it is. Only two things are this project's own:
 //  - hal/: ec_hal.h as Kotlin functions that call the page (site/hal.js);
 //  - ui/WebRuntime.kt: runApp(), whose device version blocks on input.
@@ -48,6 +48,7 @@ kotlin {
     sourceSets {
         val wasmJsMain by getting {
             kotlin.srcDir(toolkit)
+            kotlin.srcDir(ecDir.resolve("core/led/src/linuxArm64Main/kotlin"))
             kotlin.srcDir(runtimeWithoutRunApp)
             kotlin.exclude("ui/Runtime.kt")
             dependencies {
