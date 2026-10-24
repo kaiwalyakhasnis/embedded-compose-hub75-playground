@@ -57,7 +57,7 @@ def load_state():
 
 
 def examples():
-    """[{id, title, files}]: LED test, apps/matrix from embedded-compose, then this repo's other examples."""
+    """[{id, title, files}]: LED test, LED components, apps/matrix from embedded-compose, then this repo's other examples."""
     result = []
     for d in sorted((ROOT / "examples").iterdir()):
         files = {f.name: f.read_text() for f in sorted(d.glob("*.kt"))}
@@ -75,7 +75,8 @@ def examples():
             "@Composable\nfun App() = matrix.MatrixApp()\n")}
         files.update({f.name: f.read_text() for f in sorted(matrix.glob("*.kt"))})
         result.insert(0, {"id": "matrix", "title": "Matrix (embedded-compose apps/matrix)", "files": files})
-    result.sort(key=lambda e: e["id"] != "ledtest")  # first in the list (stable: the rest keep their order)
+    first = {"ledtest": 0, "ledkit": 1}  # first in the list (stable: the rest keep their order)
+    result.sort(key=lambda e: first.get(e["id"], len(first)))
     return result
 
 

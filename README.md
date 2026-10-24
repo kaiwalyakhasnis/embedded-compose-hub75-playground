@@ -55,16 +55,20 @@ The page needs a browser with WebAssembly GC: Chrome or Edge 119+, Firefox
 
 - **Examples:** *LED test*, the first one opened, checks a panel step by
   step (every LED, module numbers, an arrow, sweeps, text), made for
-  MAX7219 modules. *Matrix* is embedded-compose's `apps/matrix`, its sources
-  unchanged: a clock, a plasma, Life and a marquee. *Bounce* and *Fire* are
+  MAX7219 modules. *LED components* shows the toolkit's parts for small
+  panels (`ui.led`), one per page. *Matrix* is embedded-compose's
+  `apps/matrix`, its sources unchanged: a clock, a plasma, Life and a
+  marquee. *Bounce* and *Fire* are
   short starters. Your edits are kept in the browser for each
   example, and **Reset** undoes them.
 - **Code:** one file must define `@Composable fun App()`. Use **+** to add
   more files. The API is embedded-compose's toolkit (`ui.*`): `Box`, `Row`,
   `Column`, `Text`, `Canvas`, `drawRect`/`drawCircle`/`drawText`, modifiers,
   `rememberFrameMillis()`, `animateFloatAsState()`, plus the Compose runtime
-  (`remember`, `LaunchedEffect`, …). One dp is one LED. Text uses the
-  panel's 5x7 font.
+  (`remember`, `LaunchedEffect`, …). For small panels, `ui.led` adds
+  `Marquee`, `FitOrScroll`, `LedIcon`/`LedIcons`/`ledBitmap`, `SmallText`
+  (a 3x5 font), `BarGraph`, `ProgressBar`, `Blink`, `PageDots` and
+  `SlideTransition`. One dp is one LED. Text uses the panel's 5x7 font.
 - **Input:** click the panel, then use the keyboard. Keys arrive in
   `Device.onKey` as Linux key codes, as from a USB keyboard or GPIO
   buttons on the Pi. The buttons under the panel send Left, Up, Down, Right
@@ -98,7 +102,7 @@ The page needs a browser with WebAssembly GC: Chrome or Edge 119+, Firefox
 ```
 
 **The same as on the Pi:**
-- **The toolkit:** core/ui, compiled from the embedded-compose checkout,
+- **The toolkit:** core/ui (with `ui.led`), compiled from the embedded-compose checkout,
   including `Runtime.kt` (its event loop, input dispatch and `Device`).
   Only `runApp()` is cut out at build time.
 - **The pixels:** `backends/matrix/matrix.cpp`, which handles fills, alpha
